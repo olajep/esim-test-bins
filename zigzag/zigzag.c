@@ -31,9 +31,10 @@
 #define LEADER 0x1
 #endif
 
-/* Core mem address for message box */
-/* Cheating, outside Epiphany-III RAM */
-#define MSG_BOX 0x8000
+/* Make linker allocate memory for message box. Same binary, so same address
+ * on all cores. */
+uint16_t _msg_box[ROWS*COLS+1];
+#define MSG_BOX _msg_box
 
 /* Can't hook up to sync since e-server traps it */
 void interrupt_handler() __attribute__ ((interrupt ("message")));
