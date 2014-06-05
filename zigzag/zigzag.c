@@ -6,25 +6,47 @@
 
 #include <e_lib.h>
 
-#define ROWS 4
-#define COLS 4
-#define FIRST_ROW 0x20    // First row in group
-#define FIRST_COL 0x8     // First col in group
-#define FIRST_CORE 0x808  // Coreid of first core in group
+#ifndef ROWS
+#  define ROWS 4
+#endif
+#ifndef COLS
+#  define COLS 4
+#endif
+
 
 #define E_ROW(x) ((x) >> 6)
 #define E_COL(x) ((x) & ((1<<6)-1))
 #define E_CORE(r, c) (((r) << 6) | (c))
 
+#ifndef FIRST_CORE
+#  define FIRST_CORE 0x808  // Coreid of first core in group
+#endif
+
+#define FIRST_ROW E_ROW(FIRST_CORE)    // First row in group
+#define FIRST_COL E_COL(FIRST_CORE)    // First col in group
+
+#if FIRST_CORE
 #define LEADER FIRST_CORE
+#else
+#define LEADER 0x1
+#endif
 
 /* Core mem address for message box */
-#define MSG_BOX 0x6000
+/* Cheating, outside Epiphany-III RAM */
+#define MSG_BOX 0x8000
 
 /* Can't hook up to sync since e-server traps it */
 void interrupt_handler() __attribute__ ((interrupt ("message")));
 void pass_message();
 void print_route();
+
+void __attribute__ ((aligned(8))) __attribute__ ((noinline)) e_idle()
+{
+  // but these two instructions is what we really need to align 
+  // so the attribute won't help
+  asm("gie");
+  asm("idle");
+}
 
 int main()
 {
@@ -37,12 +59,13 @@ int main()
   if (e_get_coreid() == LEADER)
     {
       /* Give other processes time to go to idle */
-      for (i=0; i < 10000000; ++i) ;
+      for (i=0; i < 1000000; ++i) ;
       pass_message();
     }
 
   e_irq_global_mask(E_FALSE);
   asm("idle");
+  //e_idle();
   return 0;
 
 }
@@ -76,27 +99,40 @@ e_coreid_t next_hop()
   rel_row = row - FIRST_ROW;
   rel_col = col - FIRST_COL;
 
+  /* Go left on odd rel row, right on even */
   direction = (rel_row & 1) ? LEFT : RIGHT;
 
   if (coreid == LEADER)
-    return E_CORE(row, col+1);
+    {
+      if (rel_col < COLS-1)
+	return E_CORE(row, col+1);
+      else
+	return E_CORE(row+1, col);
+    }
 
   if (!rel_col)
-    return E_CORE(row-1, col);
+    {
+      if (rel_row == 1)
+	return LEADER;
+      else
+	return E_CORE(row-1, col);
+    }
 
-  if (rel_row == ROWS-1)
-    return E_CORE(row, col-1);
+  //if (rel_row == ROWS-1)
+  //  return E_CORE(row, col-1);
 
   switch (direction)
     {
     case LEFT:
-      if (rel_col == 1)
+      if (rel_col == 1 && rel_row != ROWS-1)
 	return E_CORE(row+1, col);
       else
 	return E_CORE(row, col-1);
 
     case RIGHT:
-      if (rel_col == COLS-1)
+      if (rel_row == ROWS-1 && rel_col == COLS-1)
+	return E_CORE(row, FIRST_COL);
+      else if (rel_col == COLS-1)
 	return E_CORE(row+1, col);
       else
 	return E_CORE(row, col+1);
@@ -109,9 +145,9 @@ e_coreid_t next_hop()
 void pass_message()
 {
   e_coreid_t next;
-  unsigned n;
-  unsigned *next_msgbox;
-  unsigned *msgbox = (unsigned *) MSG_BOX;
+  uint16_t n;
+  uint16_t *next_msgbox;
+  uint16_t *msgbox = (uint16_t *) MSG_BOX;
 
   if (e_get_coreid() == LEADER)
     {
@@ -120,14 +156,14 @@ void pass_message()
 
   msgbox[0]++;
   n = msgbox[0];
-  msgbox[n] = (unsigned) e_get_coreid();
+  msgbox[n] = (uint16_t) (((unsigned) e_get_coreid()) & 0xffff);
 
   next = next_hop();
-  next_msgbox = (unsigned *)
+  next_msgbox = (uint16_t *)
     e_get_global_address(E_ROW(next), E_COL(next), (void *) MSG_BOX);
-  memcpy((void *) next_msgbox, (void *) msgbox, (n+1)*sizeof(unsigned));
+  memcpy((void *) next_msgbox, (void *) msgbox, (n+1)*sizeof(msgbox[0]));
 
-  printf("Passing message to 0x%x\n", next);
+  printf("Passing message to 0x%x (%p)\n", next, next_msgbox);
   e_irq_set(E_ROW(next), E_COL(next), E_MESSAGE_INT);
 }
 
@@ -136,8 +172,8 @@ void print_route()
   int i,j;
   e_coreid_t core;
   unsigned row, col;
-  unsigned path[ROWS][COLS];
-  unsigned *msgbox = (unsigned *) MSG_BOX;
+  uint16_t path[ROWS][COLS];
+  uint16_t *msgbox = (uint16_t *) MSG_BOX;
 
   printf("Got %d messages\n", msgbox[0]);
   printf("Message path:\n");
@@ -148,13 +184,18 @@ void print_route()
 	{
 	  row = E_ROW(core) - FIRST_ROW;
 	  col = E_COL(core) - FIRST_COL;
-	  path[row][col] = i;
+	  path[row][col] = i+1;
 	}
     }
   for (i=0; i < ROWS; i++)
     {
       for (j=0; j < COLS; j++)
-	printf("%d\t", path[i][j]);
+	{
+	  if (path[i][j])
+	    printf("%d\t", path[i][j]);
+	  else
+	    printf("X\t");
+	}
 
       printf("\n");
     }

@@ -26,3 +26,5 @@ ${ERUN_PATH}epiphany-elf-run -v --e-coreid 0x8cb --e-rows 4 --e-cols 4 --e-first
 
 # Upper leftmost core
 ${ERUN_PATH}epiphany-elf-run -v --e-coreid 0x808 --e-rows 4 --e-cols 4 --e-first-core 0x808 zigzag 2>&1 | tee log.808
+
+wait
