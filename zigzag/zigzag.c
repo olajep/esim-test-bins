@@ -167,6 +167,32 @@ void pass_message()
   e_irq_set(E_ROW(next), E_COL(next), E_MESSAGE_INT);
 }
 
+inline void print_path(uint16_t path[ROWS][COLS], uint16_t row, uint16_t col)
+{
+  signed north, east, south, west;
+  uint16_t next, prev;
+
+  north = row == 0    ? -2 : path[row-1][col  ];
+  west  = col == 0    ? -2 : path[row  ][col-1];
+  south = row == ROWS ? -2 : path[row+1][col  ];
+  east  = col == COLS ? -2 : path[row  ][col+1];
+  next = path[row][col] + 1;
+  prev = path[row][col] - 1;
+
+  if (!prev)
+    fputs("○", stdout);
+  else if (north == next)
+    if (south == prev) fputs("|", stdout); else fputs("▲", stdout);
+  else if (south == next)
+    if (north == prev) fputs("|", stdout); else fputs("▼", stdout);
+  else if (west == next)
+    if (east == prev)  fputs("—", stdout); else fputs("◀", stdout);
+  else if (east == next)
+    if (west == prev)  fputs("—", stdout); else fputs("▶", stdout);
+  else
+    fputs("⚫", stdout);
+}
+
 void print_route()
 {
   int i,j;
@@ -192,11 +218,11 @@ void print_route()
       for (j=0; j < COLS; j++)
 	{
 	  if (path[i][j])
-	    printf("%d\t", path[i][j]);
+	    print_path(path, i, j);
 	  else
-	    printf("X\t");
+	    fputs("⨯", stdout);
 	}
 
-      printf("\n");
+      fputs("\n", stdout);
     }
 }
