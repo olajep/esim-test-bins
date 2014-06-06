@@ -173,10 +173,11 @@ inline void print_path(uint16_t path[ROWS][COLS], uint16_t row, uint16_t col)
   signed north, east, south, west;
   uint16_t next, prev;
 
-  north = row == 0    ? -2 : path[row-1][col  ];
-  west  = col == 0    ? -2 : path[row  ][col-1];
-  south = row == ROWS ? -2 : path[row+1][col  ];
-  east  = col == COLS ? -2 : path[row  ][col+1];
+  north = row == 0      ? -2 : path[row-1][col  ];
+  west  = col == 0      ? -2 : path[row  ][col-1];
+  south = row == ROWS-1 ? -2 : path[row+1][col  ];
+  east  = col == COLS-1 ? -2 : path[row  ][col+1];
+
   next = path[row][col] + 1;
   prev = path[row][col] - 1;
 
