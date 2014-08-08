@@ -11,10 +11,11 @@ LDLIBS   = -le-lib
 
 SRCS     = $(shell find . -name "*.c")
 BINS     = $(SRCS:.c=)
-BINS     += zigzag/zigzag16 zigzag/zigzag64 zigzag/zigzag768 zigzag/zigzag4095
+BINS     += zigzag/zigzag16 zigzag/zigzag64 zigzag/zigzag120 zigzag/zigzag768 zigzag/zigzag4095
 
 ZIGZAG_16_CFLAGS    = -DROWS=4  -DCOLS=4  -DFIRST_CORE=0x808
 ZIGZAG_64_CFLAGS    = -DROWS=8  -DCOLS=8  -DFIRST_CORE=0x808
+ZIGZAG_120_CFLAGS   = -DROWS=15 -DCOLS=8  -DFIRST_CORE=0x808
 ZIGZAG_768_CFLAGS   = -DROWS=32 -DCOLS=24 -DFIRST_CORE=0x808
 ZIGZAG_4095_CFLAGS  = -DROWS=64 -DCOLS=64 -DFIRST_CORE=0
 ZIGZAG_4095_LDFLAGS = -T./zigzag/extraminternal.ldf
@@ -26,6 +27,9 @@ zigzag/zigzag16: zigzag/zigzag.c
 
 zigzag/zigzag64: zigzag/zigzag.c
 	$(CC) -o $@ $(ZIGZAG_64_CFLAGS) $(CFLAGS) $< $(LDLIBS) -Wl,$(LDFLAGS)
+
+zigzag/zigzag120: zigzag/zigzag.c
+	$(CC) -o $@ $(ZIGZAG_120_CFLAGS) $(CFLAGS) $< $(LDLIBS) -Wl,$(LDFLAGS)
 
 zigzag/zigzag768: zigzag/zigzag.c
 	$(CC) -o $@ $(ZIGZAG_768_CFLAGS) $(CFLAGS) $< $(LDLIBS) -Wl,$(LDFLAGS)
