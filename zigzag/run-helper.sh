@@ -41,8 +41,12 @@ FIRST_COL=$[$FIRST_CORE%64]
 LEADER_ROW=$[$LEADER/64]
 LEADER_COL=$[$LEADER%64]
 
-MESH_CFG="--e-rows ${ROWS} --e-cols ${COLS} --e-first-core ${FIRST_CORE} \
-          --e-ext-ram-size ${EXT_RAM_SIZE} --e-ext-ram-base ${EXT_RAM_BASE}"
+if [[ -n $XML ]]; then
+    MESH_CFG="--e-hdf ${XML}"
+else
+    MESH_CFG="--e-rows ${ROWS} --e-cols ${COLS} --e-first-core ${FIRST_CORE} \
+      --e-ext-ram-size ${EXT_RAM_SIZE} --e-ext-ram-base ${EXT_RAM_BASE}"
+fi
 
 
 # Create log dir
