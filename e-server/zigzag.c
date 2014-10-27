@@ -66,7 +66,7 @@ int main()
   if (e_get_coreid() == LEADER)
     {
       /* Give other processes time to go to idle */
-      for (i=0; i < 200000000; i++) ;
+      for (i=0; i < 100000000; i++) ;
       pass_message();
     }
 
@@ -83,6 +83,7 @@ int interrupt_handler()
       /* Print route message took */
       print_route();
       //return 3;
+      asm("idle");
       return 0;
     }
   else
