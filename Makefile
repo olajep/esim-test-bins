@@ -12,6 +12,7 @@ LDLIBS   = -le-lib
 SRCS     = $(shell find . -name "*.c")
 BINS     = $(SRCS:.c=)
 BINS     += zigzag/zigzag16 zigzag/zigzag64 zigzag/zigzag120 zigzag/zigzag768 zigzag/zigzag4095
+BINS     += e-server/branch_by_coreid e-server/zigzag16
 
 ZIGZAG_16_CFLAGS    = -DROWS=4  -DCOLS=4  -DFIRST_CORE=0x808
 ZIGZAG_64_CFLAGS    = -DROWS=8  -DCOLS=8  -DFIRST_CORE=0x808
@@ -36,6 +37,9 @@ zigzag/zigzag768: zigzag/zigzag.c
 
 zigzag/zigzag4095: zigzag/zigzag.c
 	$(CC) -o $@ $(ZIGZAG_4095_CFLAGS) $(CFLAGS) $< $(LDLIBS) -Wl,$(ZIGZAG_4095_LDFLAGS)
+
+e-server/zigzag16: e-server/zigzag.c
+	$(CC) -o $@ $(ZIGZAG_16_CFLAGS) $(CFLAGS) $< $(LDLIBS) -Wl,$(LDFLAGS)
 
 clean:
 	rm -f $(BINS) zigzag/log/log.*
