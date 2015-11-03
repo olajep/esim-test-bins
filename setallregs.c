@@ -27,10 +27,10 @@ int main()
   __asm__ ("add r10, r10, 1");
   __asm__ ("movts ipend, r10");
   __asm__ ("add r10, r10, 1");
-  __asm__ ("movts hstatus, r10");
+  __asm__ ("movts fstatus, r10");
   __asm__ ("add r10, r10, 1");
 /*    __asm__ ("movts debugcmd, r10"); */
-  __asm__ ("movts swreset, r10");
+  __asm__ ("movts resetcore, r10");
   __asm__ ("add r10, r10, 1");
   __asm__ ("movts ctimer0, r10");
   __asm__ ("add r10, r10, 1");

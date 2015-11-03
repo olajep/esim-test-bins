@@ -1,5 +1,5 @@
 # Fast will break some prgrams, but without it some will fail to compile.
-LDF     ?= /opt/adapteva/esdk/bsps/current/fast.ldf
+LDF     ?= ${EPIPHANY_HOME}/bsps/current/fast.ldf
 #LDF     ?= /opt/adapteva/esdk/bsps/current/internal.ldf
 # Optimizations will break some programs
 #CFLAGS   = -DROWS=63 -DCOLS=64 -DFIRST_CORE=0x40 -g -O0 -Wall -Wno-unused -Werror -ffast-math -falign-functions=16

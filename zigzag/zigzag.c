@@ -67,8 +67,9 @@ int main()
   e_irq_global_mask(E_FALSE);
   asm("idle");
   //e_idle();
-  return 0;
 
+  // Unreachable
+  return 1;
 }
 
 void interrupt_handler()
@@ -77,13 +78,13 @@ void interrupt_handler()
     {
       /* Print route message took */
       print_route();
-      exit(3);
+      exit(0);
     }
   else
     {
       /* Pass message to next core in path */
       pass_message();
-      _exit(2); // Normal exit seems to close other processes stdout ???
+      _exit(0); // Normal exit seems to close other processes stdout ???
     }
 }
 
@@ -164,11 +165,10 @@ void pass_message()
     e_get_global_address(E_ROW(next), E_COL(next), (void *) MSG_BOX);
   memcpy((void *) next_msgbox, (void *) msgbox, (n+1)*sizeof(msgbox[0]));
 
-  printf("Passing message to 0x%x (%p)\n", next, next_msgbox);
   e_irq_set(E_ROW(next), E_COL(next), E_MESSAGE_INT);
 }
 
-inline void print_path(uint16_t path[ROWS][COLS], uint16_t row, uint16_t col)
+static void print_path(uint16_t path[ROWS][COLS], uint16_t row, uint16_t col)
 {
   signed north, east, south, west;
   uint16_t next, prev;

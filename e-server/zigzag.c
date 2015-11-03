@@ -185,7 +185,7 @@ void pass_message()
   // set next msg_flag
 }
 
-inline void print_path(uint16_t path[ROWS][COLS], uint16_t row, uint16_t col)
+void print_path(uint16_t path[ROWS][COLS], uint16_t row, uint16_t col)
 {
   signed north, east, south, west;
   uint16_t next, prev;
