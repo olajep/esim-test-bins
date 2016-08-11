@@ -7,7 +7,7 @@ int main()
 //  __asm__ ("add r10, r10, 1");
 //  __asm__ ("movts pc, r10");
 //  __asm__ ("add r10, r10, 1");
-  __asm__ ("movts DEBUG, r10");
+  __asm__ ("movts debugstatus, r10");
   __asm__ ("add r10, r10, 1");
   __asm__ ("movts lc, r10");
   __asm__ ("add r10, r10, 1");
